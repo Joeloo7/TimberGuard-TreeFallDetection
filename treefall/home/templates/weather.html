@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TimberGuard | Weather Information</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #4CAF50;
+            padding: 20px;
+        }
+        .container {
+            max-width: 400px;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            margin: auto;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            margin-top: 10px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        input {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        h3 {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>TimberGuard</h2>
+        <button onclick="find()">Get your location</button>
+        
+        <form method="post">
+            <label>Latitude</label>
+            <input type="text" name="latitude" id="lat" value="0" readonly>
+            <label>Longitude</label>
+            <input type="text" name="longitude" id="long" value="0" readonly>
+            <input type="hidden" name="disease" value="{{disease}}">
+            <input type="hidden" name="moment" value="{{moment}}">
+            <button type="submit" name="weather" value="sub">Submit</button>
+        </form>
+        
+        <h3>Weather Information</h3>
+        <span>Rainfall: {{rain}} mm</span><br>
+        <span>Wind Speed: {{wind}} Km/h</span>
+        
+        <form method="post">
+            <input type="hidden" name="disease" value="{{disease}}">
+            <input type="hidden" name="moment" value="{{moment}}">
+            <input type="hidden" name="windspeed" value="{{wind}}">
+            <input type="hidden" name="rain" value="{{rain}}">
+            <button type="submit" name="sub" value="nothing">Predict Risk</button>
+        </form>
+        <h3>Result<b><span> {{output}}</span></b></h3>
+    </div>
+    <script>
+        function find()
+        {
+            if(navigator.geolocation){
+                navigator.geolocation.getCurrentPosition(find_coord)
+            }
+        }
+        function find_coord(p)
+        {
+            let latitude=p.coords.latitude;
+            document.getElementById('lat').value=latitude.toFixed(4);
+            let long=p.coords.longitude;
+            document.getElementById('long').value=long.toFixed(4);            
+        }
+    </script>
+    
+</body>
+</html>

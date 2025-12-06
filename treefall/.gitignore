@@ -1,0 +1,27 @@
+# ===== Python / Django =====
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# ===== Databases =====
+*.sqlite3
+*.db
+*.sqlite
+
+# ===== Media uploads =====
+media/
+media/*
+
+# ===== Machine Learning models =====
+*.keras
+*.h5
+*.pkl
+
+# ===== Certificates =====
+cert.*
+*.crt
+*.key
+
+# ===== Environment variables =====
+.env

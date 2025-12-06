@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tree Risk Predictor</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #2d6a4f;
+            color: white;
+        }
+        
+        h4, h5 {
+            margin: 5px 0;
+        }
+        
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            width: 90%;
+            max-width: 1200px;
+            margin-top: 20px;
+            background: #74c69d;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        .video-container {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        
+        video {
+            border: 5px solid #1b4332;
+            border-radius: 10px;
+        }
+        
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            width: 100%;
+        }
+        
+        .control-box {
+            flex: 1;
+            min-width: 250px;
+            background: #b7e4c7;
+            padding: 15px;
+            margin: 10px;
+            border-radius: 8px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+            border-left: 5px solid #95d5b2;
+            color: black;
+        }
+        
+        button {
+            background: #95d5b2;
+            border: none;
+            padding: 10px 15px;
+            margin-top: 5px;
+            cursor: pointer;
+            border-radius: 5px;
+            font-weight: bold;
+            color: black;
+        }
+        
+        button:hover {
+            background: #d8f3dc;
+        }
+
+        input {
+            padding: 5px;
+            border: none;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div style="position: fixed;top:16%;left:40%;border-style: solid;border-color:#ff0000;width:20%;height: 0%;">
+    </div>
+    <div style="position: fixed;top:11%;left:50%;border-style: solid;width:0%;height: 10%;border-color:#ff0000;border-color:#ff0000;">
+    </div>
+    <div class="container">
+        <div class="video-container">
+            <video id="first" height="512" width="512" autoplay></video>
+        </div>
+        
+        <div class="controls">
+            <div class="control-box">
+                <label>Enter your eye-level height (m):</label>
+                <input type="text" id="usr_height" value="1">
+                <h4>X-axis rotation: <span id="angle">0.000</span><sup>o</sup></h4>
+                <button onclick="start(false, true, false)">Start</button>
+                <button onclick="start(false, false, false)">Stop</button>
+                <h4>Distance from tree: <span id="distance">0.000</span> m</h4>
+                <button onclick="calculate()">Find Distance</button>
+                <h4>Height of tree: <span id="tree_height">0.000</span> m</h4>
+                <button onclick="cal_tree_ht()">Find Tree Height</button>
+            </div>
+            
+            <div class="control-box">
+                <h4>Tilt of Tree</h4>
+                <button onclick="start_acc_g(false, true)">Start</button>
+                <button onclick="start_acc_g(true, false)">Stop</button>
+                <h4>Tilt: <span id="sidetilt">0.000</span><sup>o</sup></h4>
+            </div>
+            
+            <div class="control-box">
+                <h4>Width of Tree</h4>
+                <h5>Parallax angle: <span id="para">0.000</span><sup>o</sup></h5>
+                <button onclick="start(false, true, true)">Start</button>
+                <button onclick="start(false, false, true)">Stop</button>
+                <h5>Width: <span id="width">0.000</span> m</h5>
+                <button onclick="tree_width()">Find Width</button>
+            </div>
+        </div>
+        
+        <div class="control-box">
+            <h4>Find Torque of Tree Due to Gravity</h4>
+            <button onclick="find()">Calculate Torque</button>
+            <span id="tau">0.000</span> Nm
+            <h4>Tree Fall Risk (Species-Independent)</h4>
+            <button onclick="risk()">Find Risk</button>
+            <span id="fall_risk"></span>
+        </div>
+        <form method="post">
+            <input type="hidden" name="disease" value="{{flag}}">
+            <input type="hidden" name="moment" id="moment_value">
+            <button onclick="document.getElementById('moment_value').value=document.getElementById('tau').innerHTML" type="submit" name="next" value="weather">Next</button>
+        </form>
+    </div>
+    <script>
+        var video=document.querySelector("#first");
+        try
+        {
+            navigator.mediaDevices.getUserMedia({video:{facingMode:{exact:"environment"}},audio:false}).then(function (stream){ video.srcObject=stream });
+        }
+        catch(err)
+        {   
+            console.log("too bad");
+        }
+        </script>
+        <script>
+        function sideTilt(event)
+        {
+            let x=event.accelerationIncludingGravity.x;
+            let y=event.accelerationIncludingGravity.y;
+            let tilt=Math.abs(((180*Math.atan((x/y)))/Math.PI).toFixed(3));
+            document.getElementById('sidetilt').innerHTML=tilt;
+        }
+        function tiltOfDevice(event)
+        {
+            document.getElementById("angle").innerHTML=event.beta.toFixed(3);
+        }
+        function paraAngle(event)
+        {
+            if(i==false)
+            {
+                init=event.gamma.toFixed(3)
+                i=true
+            }
+            document.getElementById('para').innerHTML=event.gamma.toFixed(3);
+        }
+
+        function start_acc_g(run,flag)
+        {
+        if(flag)
+        {
+            if(run)
+            {
+                window.removeEventListener('devicemotion',sideTilt);
+                run=false;
+            }
+            else{
+                window.addEventListener('devicemotion',sideTilt);
+                run=true;
+                }
+        }
+            else
+            {window.removeEventListener('devicemotion',sideTilt);}
+        }
+        var i=false,init,final;
+        function start(runn,flag,para){
+        if(flag){    
+        if(runn)
+        {
+            if(para==false){
+            window.removeEventListener('deviceorientation',tiltOfDevice);
+            }
+            else{window.removeEventListener('deviceorientation',paraAngle);}
+            runn=false;
+        }
+        else{
+        if(window.DeviceOrientationEvent)
+        {
+            if(para==false){
+            window.addEventListener('deviceorientation',tiltOfDevice);
+            }
+            else{window.addEventListener('deviceorientation',paraAngle);}
+        }
+           }
+        }
+        else{if(para==false){
+            window.removeEventListener('deviceorientation',tiltOfDevice);
+            }
+            else{window.removeEventListener('deviceorientation',paraAngle);
+            if(i==true)
+            {final=parseFloat(document.getElementById('para').innerHTML);
+            document.getElementById('para').innerHTML=Math.abs(init-final).toFixed(7);i=false}
+            }}
+    }
+    function calculate()
+    {
+        let tilt=parseFloat(document.getElementById("angle").innerHTML);
+        let height=parseFloat(document.getElementById("usr_height").value);
+        document.getElementById("distance").innerHTML=(Math.tan((tilt*Math.PI)/180)*height).toFixed(2);
+    }
+    function cal_tree_ht()
+    {
+        let tilt=parseFloat(document.getElementById("angle").innerHTML);
+        let dist=parseFloat(document.getElementById("distance").innerHTML);
+        let height=parseFloat(document.getElementById("usr_height").value);
+        document.getElementById("tree_height").innerHTML=((Math.tan(((tilt-90)*Math.PI)/180)*dist)+height).toFixed(2);
+    }
+
+    function tree_width()
+    {
+        let d=parseFloat(document.getElementById("distance").innerHTML);
+        let pangle=parseFloat(document.getElementById("para").innerHTML);
+        document.getElementById("width").innerHTML=((Math.tan(((pangle*Math.PI)/180)))*d).toFixed(3)
+
+    }
+    function find()
+    {
+        let width=parseFloat(document.getElementById('width').innerHTML);
+        let height=parseFloat(document.getElementById('tree_height').innerHTML);
+        let tilt=parseFloat(document.getElementById('sidetilt').innerHTML)
+        let density=600;//kg/m^3;
+        let pi=Math.PI;
+        let m=pi*((width*width)/4)*height*(1/Math.cos((tilt*pi)/180))*density;
+        let torque=m*9.80665*Math.sin((tilt*pi)/180)*height*(1/Math.cos((tilt*pi)/180))*0.5;
+        document.getElementById('tau').innerHTML=torque.toFixed(3)
+
+    }
+    function risk()
+    {
+    let torque=parseFloat(document.getElementById("tau").innerHTML)
+    if(torque>=0 && torque<80000)
+    {
+        document.getElementById('fall_risk').innerHTML="Low risk";
+    }
+    else if(torque>=80000 && torque<150000)
+    {
+        document.getElementById('fall_risk').innerHTML="Medium risk";  
+    }
+    else
+    {
+        document.getElementById('fall_risk').innerHTML="High risk";
+    }
+    }
+    </script>
+</body>
+</html>

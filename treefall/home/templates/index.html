@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TimberGuard</title>
+</head>
+<body>
+    <form method="post" enctype="multipart/form-data">
+        <label>
+            upload trunk image <input capture="environment" type="file" accept=".jpg,.jpeg,.png,.jfif" name="infile">
+        </label>
+        <input type="submit" name="Predict disease">
+        <label> result: {{flag}}</label>
+    </form>
+    <img src="{{url}}" alt="">
+
+</body>
+</html>

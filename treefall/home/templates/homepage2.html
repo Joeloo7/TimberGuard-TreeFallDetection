@@ -1,0 +1,130 @@
+{%load static%}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TimberGuard</title>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: #2d6a4f;
+            color: white;
+            text-align: center;
+        }
+        
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            padding: 20px;
+        }
+        
+        .logo img {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+        }
+        
+        h1 {
+            font-size: 3em;
+            margin: 0;
+            color: #b7e4c7;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        
+        .banner {
+            width: 100%;
+            max-height: 400px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .banner img {
+            width: 100%;
+            height: auto;
+            object-fit: cover;
+            position: absolute;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+        }
+        
+        .button-container {
+            margin-top: 20px;
+        }
+        
+        .button {
+            background: #40916c;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.2em;
+            cursor: pointer;
+            border-radius: 5px;
+            font-weight: bold;
+            color: white;
+            text-decoration: none;
+            margin: 10px;
+            display: inline-block;
+        }
+        
+        .button:hover {
+            background: #52b788;
+        }
+        
+        .about-button {
+            background: #1b4332;
+            padding: 10px 20px;
+            font-size: 1em;
+            cursor: pointer;
+            border-radius: 5px;
+            font-weight: bold;
+            color: white;
+            text-decoration: none;
+        }
+        
+        .about-button:hover {
+            background: #081c15;
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="header">
+        <h1>TimberGuard</h1>
+        <div class="logo">
+            <img src="{%static 'logo.jpg'%}" alt="Logo">
+        </div>
+    </div>
+    <div class="banner">
+        <img src="{%static 'banner1.jpg'%}" alt="Forest Banner">
+        <img src="{%static 'banner2.jpg'%}" alt="Forest Banner">
+        <img src="{%static 'banner3.jpg'%}" alt="Forest Banner">
+    </div>
+    
+    <div class="button-container">
+        <form method="post">
+            <button type="submit" name="name" value="disease" class="button">Calculate Risk</button>
+            <button type="submit" name="name" value="aboutus" class="about-button">About Us</button>
+        </form>
+    </div>
+    
+    <script>
+        let currentImageIndex = 0;
+        const images = document.querySelectorAll('.banner img');
+        images[currentImageIndex].style.opacity = 1;
+
+        setInterval(() => {
+            images[currentImageIndex].style.opacity = 0;
+            currentImageIndex = (currentImageIndex + 1) % images.length;
+            images[currentImageIndex].style.opacity = 1;
+        }, 3000);
+    </script>
+</body>
+</html>
